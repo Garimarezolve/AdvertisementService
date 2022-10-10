@@ -2,6 +2,8 @@ package com.resolve.advertisement.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resolve.advertisement.ApplicationConstantTest;
+import com.resolve.advertisement.dto.AdvertisementResponseDto;
+import com.resolve.advertisement.dto.GeoFence;
 import com.resolve.advertisement.dto.GeoFenceDto;
 import com.resolve.advertisement.dto.ResponseDto;
 import com.resolve.advertisement.entity.AdvertisementEntity;
@@ -97,9 +99,36 @@ public class AdvertisementServiceTest {
     }
 
     @Test
-    void deleteAdvertising() {
+    void deleteAdvertisement() {
         given(advertisementRepository.findById(Mockito.any())).willReturn(Optional.of(advertisement));
         ResponseDto advertisingModelResponse = advertisementService.deleteAdvertisement(advertisement.getAddId());
         Assertions.assertEquals(200, advertisingModelResponse.getCode());
+    }
+
+
+    @Test
+    void getAdvertisement() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        GeoFenceDto geoFencesDto = mapper.readValue(ApplicationConstantTest.GEO_RESPONSE, GeoFenceDto.class);
+        when(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(Class.class)))
+                .thenReturn(ResponseEntity.ok(geoFencesDto));
+        given(distanceCalculator.checkInsideGeoLocation(Mockito.any(), Mockito.any(), Mockito.any())).willReturn(true);
+        List<GeoFence> geoFences = (List<GeoFence>) advertisementService
+                .getAdvertisement(advertisement.getLatitude(), advertisement.getLongitude()).getData();
+        Assertions.assertEquals(2, geoFences.size());
+    }
+
+
+    @Test
+    void getAdvertisingInGeoLocation() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        GeoFenceDto geoDto = mapper.readValue(ApplicationConstantTest.GEO_RESPONSE, GeoFenceDto.class);
+        given(advertisementGeoFenceMappingRepository.findByGeoFenceIds(Mockito.any())).willReturn(advertisementGeoFenceMappings);
+        given(advertisementRepository.findAllById(Mockito.any())).willReturn(advertisements);
+        when(restTemplate.getForEntity(Mockito.anyString(), Mockito.any(Class.class)))
+                .thenReturn(ResponseEntity.ok(geoDto));
+        Collection<AdvertisementResponseDto> geos = (Collection<AdvertisementResponseDto>) advertisementService
+                .getAdvertisingInGeoLocation(advertisement.getLatitude(), advertisement.getLongitude()).getData();
+        Assertions.assertEquals(0, geos.size());
     }
 }

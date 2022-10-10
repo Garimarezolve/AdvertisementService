@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface AdvertisementGeoFenceMappingRepository extends JpaRepository<AdvertisementGeoFenceMapping,Long>{
-    @Query(value = "SELECT * FROM advertising_geofence_mapping m WHERE m.geo_id IN :geoId",nativeQuery = true)
+    @Query(value = "SELECT * FROM advertisement_geo_mapping m WHERE m.geo_id IN :geoId",nativeQuery = true)
     List<AdvertisementGeoFenceMapping> findByGeoFenceIds(@Param("geoId") List<Long> geoId);
 }

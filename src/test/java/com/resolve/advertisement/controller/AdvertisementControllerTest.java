@@ -68,6 +68,14 @@ public class AdvertisementControllerTest {
                 .andExpect(status().isOk());
     }
 
+    @Test
+    void getAdvertisement() throws Exception{
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get(ApplicationConstantTest.CONTROLLER_BASE_URL +"/getAdvertisement?latitude=10&longitude=12")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
     public static String asJsonString(final  Object obj){
         try{
             return  new ObjectMapper().writeValueAsString(obj);

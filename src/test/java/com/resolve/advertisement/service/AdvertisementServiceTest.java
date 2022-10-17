@@ -10,7 +10,6 @@ import com.resolve.advertisement.entity.AdvertisementEntity;
 import com.resolve.advertisement.entity.AdvertisementGeoFenceMapping;
 import com.resolve.advertisement.repository.AdvertisementGeoFenceMappingRepository;
 import com.resolve.advertisement.repository.AdvertisementRepository;
-import com.resolve.advertisement.repository.service.AdvertisementService;
 import com.resolve.advertisement.utils.DistanceCalculator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;

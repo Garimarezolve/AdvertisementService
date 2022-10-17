@@ -1,4 +1,4 @@
-package com.resolve.advertisement.repository.service;
+package com.resolve.advertisement.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.resolve.advertisement.constant.ApplicationConstant;
@@ -32,16 +32,21 @@ public class AdvertisementService {
     @Value("${client.geo.baseUrl}")
     private String geoBaseClientURl;
     @Autowired
-     DistanceCalculator distanceCalculator;
+    DistanceCalculator distanceCalculator;
 
     /*
      * This function validate the href of advertisement
      */
-    public int validateHrefUrl(String href) {
+    public boolean validateHrefUrl(String href) {
+        boolean isValidate=false;
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
         HttpEntity<String> entity = new HttpEntity<String>(headers);
-        return restTemplate.exchange(href, HttpMethod.GET, entity, String.class).getStatusCodeValue();
+        int statusCode= restTemplate.exchange(href, HttpMethod.GET, entity, String.class).getStatusCodeValue();
+        if (statusCode==200){
+            isValidate=true;
+        }
+        return isValidate;
     }
 
     /*
@@ -82,26 +87,26 @@ public class AdvertisementService {
 
     @Transactional
     public ResponseDto addAdvertisement(AdvertisementEntity advertisement) {
-        int isValidUrl = validateHrefUrl(advertisement.getHref());
-        if (isValidUrl != 200) {
+        boolean isValidUrl = validateHrefUrl(advertisement.getHref());
+        if (isValidUrl != true) {
             return new ErrorResponseDto(ApplicationConstant.HTTP_RESPONSE_ERROR_CODE_HREF,
-                         "received unsuccessful status code " + isValidUrl +
-                                 " from " + advertisement.getHref());
+                    "received unsuccessful status code " + isValidUrl +
+                            " from " + advertisement.getHref());
         }
-        AdvertisementEntity responseDto = advertisementRepository.save(advertisement);
+        AdvertisementEntity advertisementEntity = advertisementRepository.save(advertisement);
         List<GeoFence> geoFences = (List<GeoFence>) getAdvertisement(advertisement.getLatitude(),
-                            advertisement.getLongitude()).getData();
+                advertisement.getLongitude()).getData();
         Set<AdvertisementGeoFenceMapping> advertisingGeoFenceMappingSet = new HashSet<>();
         AdvertisementGeoFenceMapping advertisingGeoFenceMapping;
         if (geoFences != null && !geoFences.isEmpty()) {
             for (GeoFence loopGeoFence : geoFences) {
                 advertisingGeoFenceMapping = new AdvertisementGeoFenceMapping(loopGeoFence.getId(),
-                                                responseDto.getAddId());
+                        advertisementEntity.getAddId());
                 advertisingGeoFenceMappingSet.add(advertisingGeoFenceMapping);
             }
             advertisementGeoFenceMappingRepository.saveAll(advertisingGeoFenceMappingSet);
         }
-        return new SuccessResponseDto(responseDto);
+        return new SuccessResponseDto(advertisementEntity);
     }
 
 

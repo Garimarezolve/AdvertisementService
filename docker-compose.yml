@@ -1,0 +1,65 @@
+version: '3'
+services:
+  advertisement_service:
+    image: 'spring-advertisement:latest'
+    build:
+      context: ./
+    ports:
+      - "8090:8090"
+    container_name: advertisement_service
+    links :
+      - geofenceService
+    networks:
+      - resolve-geofence
+    depends_on:
+      - geofenceService
+      - postgres
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      # CLIENT_GEO_BASEURL=http://geofence_service
+  geofenceService:
+    image: 'geofence_service:latest'
+    build:
+      context: ./
+    ports:
+      - "8080:8080"
+    container_name: geofenceService
+    networks:
+      - resolve-geofence
+    depends_on:
+     - postgres
+      #  condition: service_healthy
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+  postgres:
+    image: 'postgres:13.1-alpine'
+    container_name: postgres
+    networks:
+      - resolve-geofence
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+volumes:
+  db:
+    driver: local
+networks:
+    resolve-geofence :
+     driver: bridge
+
+

@@ -55,7 +55,7 @@ public class AdvertisementService {
     public List<GeoFence> getGeoList() {
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
-        ResponseEntity<Object> response = restTemplate.getForEntity(geoBaseClientURl + "/getGeos", Object.class);
+        ResponseEntity<Object> response = restTemplate.getForEntity(geoBaseClientURl + "/Geos", Object.class);
         log.info("list of geofence is ", response);
         Object obj = response.getBody();
         ObjectMapper mapper = new ObjectMapper();

@@ -29,7 +29,7 @@ public class AdvertisementController {
         return advertisementService.deleteAdvertisement(advertisingId);
     }
 
-    @PutMapping("advertisement")
+    @PutMapping("/advertisement")
     public ResponseDto updateAdvertisement(@Valid @RequestBody AdvertisementEntity request) {
         log.info("updating advertising for request {}", request);
         return advertisementService.updateAdvertisement(request);
